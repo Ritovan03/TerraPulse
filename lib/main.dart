@@ -5,15 +5,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:leaf_lens/controllers/gemini_controller.dart';
 import 'package:leaf_lens/pages/LoginPage.dart';
-import 'package:leaf_lens/pages/homepage.dart';
-import 'package:another_flutter_splash_screen/another_flutter_splash_screen.dart';
 
 
 void main() async {
   final dotenv = DotEnv();
   await dotenv.load(fileName: ".env");
   String APIKEY = dotenv.get('GEMINI-APIKEY');
-  if (APIKEY == null || APIKEY.isEmpty) {
+  if (APIKEY.isEmpty) {
     throw Exception("API key not found or empty in .env file");
   }
   Gemini.init(apiKey: APIKEY);

@@ -14,12 +14,12 @@ class _ChatPageState extends State<ChatPage> {
 
 GeminiChatController chatController=Get.find();
 TextEditingController inputController=TextEditingController();
-ScrollController _scrollController=ScrollController();
+final ScrollController _scrollController=ScrollController();
 
 void _scrollToBottom(){
   _scrollController.animateTo(
     _scrollController.position.extentTotal,
-    duration: Duration(milliseconds: 300),
+    duration: const Duration(milliseconds: 300),
     curve: Curves.easeOut,
   );
 }
@@ -48,7 +48,7 @@ void handleClick(int item){
                             return Center(child: Container(
                               width: 200.w,
                               height: 200.w,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 image: DecorationImage(
                                   image: AssetImage('assets/Animation.gif'),fit: BoxFit.cover
                                   )
@@ -59,13 +59,13 @@ void handleClick(int item){
                               return Center(
                                 child: Column(
                                   children: [
-                                    Container(
+                                    SizedBox(
                                     height: 250.w,
                                     width: 250.w,
                                     
-                                    child: Image(image: AssetImage('assets/robot.png'),fit: BoxFit.cover,),
+                                    child: const Image(image: AssetImage('assets/robot.png'),fit: BoxFit.cover,),
                                   ),
-                                    Container(
+                                    SizedBox(
                                       width: 300.w,
                                       //height: 200.h,
                                       //color: Colors.amber,
@@ -95,7 +95,7 @@ void handleClick(int item){
                 margin: EdgeInsets.only(top: 20.h,bottom: 5.h),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.w),
-                  color: Color.fromARGB(255, 26, 25, 25),
+                  color: const Color.fromARGB(255, 26, 25, 25),
                 ),
                 width: 350.w,
                 height: 60.h,
@@ -114,7 +114,7 @@ void handleClick(int item){
                                 width: 280.w,
                                 height: 60.h,
                                 child: TextField(
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     overflow: TextOverflow.fade,
                                     
                                   
@@ -123,22 +123,22 @@ void handleClick(int item){
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10.w),
-                                      borderSide: BorderSide(color: Colors.transparent)
+                                      borderSide: const BorderSide(color: Colors.transparent)
                                       
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10.w),
-                                      borderSide: BorderSide(color: Colors.transparent)
+                                      borderSide: const BorderSide(color: Colors.transparent)
                                       
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(10.w),
-                                      borderSide: BorderSide(color: Colors.transparent)
+                                      borderSide: const BorderSide(color: Colors.transparent)
                                       
                                     ),
                                     
                                     hintText: 'Ask anything here',
-                                    hintStyle: TextStyle(
+                                    hintStyle: const TextStyle(
                                       
                                       color: Colors.white38
                                     )
@@ -149,7 +149,7 @@ void handleClick(int item){
                           IconButton(onPressed: (){
                             chatController.geminiStream(inputController.text,(){_scrollToBottom();});
                             inputController.text='';
-                          },icon: Icon(Icons.send,color: Colors.blueAccent,),)
+                          },icon: const Icon(Icons.send,color: Colors.blueAccent,),)
                             ],
                           );
                             }
@@ -179,13 +179,13 @@ void handleClick(int item){
            // margin: EdgeInsets.only(bottom: 10.h),
             width: 250.w,
 
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               //borderRadius: BorderRadius.circular(10.w),
               //color: Colors.amberAccent  
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(chatController.outputs[index],style: TextStyle(color: Colors.grey),),
+              child: Text(chatController.outputs[index],style: const TextStyle(color: Colors.grey),),
             ),
           );
       }),
@@ -204,7 +204,7 @@ void handleClick(int item){
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(colors: [color,Colors.amberAccent]),
                                 borderRadius: BorderRadius.circular(15.w),
-                                boxShadow: [BoxShadow(
+                                boxShadow: const [BoxShadow(
                                   blurRadius: 1,
                                   spreadRadius: 1,
                                   offset: Offset(1, 2)

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:leaf_lens/controllers/gemini_controller.dart';
 import 'package:get/get.dart';
-import 'package:leaf_lens/pages/chat_page.dart';
 import 'package:leaf_lens/pages/species_list_page.dart';
 import 'package:leaf_lens/pages/vision_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,25 +45,29 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.green[700],
+        backgroundColor: Colors.grey[700],
         title: Row(
           children: [
-            Image(
-              image: AssetImage('assets/leaf.png'),
-              width: 40,
-            ),
-            SizedBox(width: 10),
             Text(
-              'Plant Pedia',
+              '🌏',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 24.sp,
               ),
             ),
-            Spacer(),
+            const SizedBox(width: 20),
+            Text(
+              'Terra Pulse',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 24.sp,
+              ),
+            ),
+            const Spacer(),
             IconButton(
-              icon: Icon(Icons.info_outline, color: Colors.white),
+              icon: const Icon(Icons.info_outline, color: Colors.white),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -73,8 +76,8 @@ class _HomePageState extends State<HomePage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      title: Text("Made by"),
-                      content: Column(
+                      title: const Text("Made by"),
+                      content: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -96,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            "Ritowan Gupta",
+                            "Ritovan Dasgupta",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -120,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: Text(
+                          child: const Text(
                             "💖Love it!",
                             style: TextStyle(color: Colors.pink),
                           ),
@@ -136,12 +139,12 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _page(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.green[200],
-        unselectedItemColor: Colors.white,
+        backgroundColor: Colors.white,
+        unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.black,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -166,28 +169,28 @@ class _HomePageState extends State<HomePage> {
   Widget _page(int index) {
     switch (index) {
       case 0:
-        return VisionPage();
+        return const VisionPage();
       case 1 :
-        return Marketplacepage();
+        return const Marketplacepage();
       case 2:
         return LeaderboardPage(userBioPoints: totalBioPoints, username: username);
       case 3:
-        return SpeciesListPage();
+        return const SpeciesListPage();
       default:
-        return VisionPage();
+        return const VisionPage();
     }
   }
 }
 
 class Marketplacepage extends StatelessWidget{
 
-  Marketplacepage();
+  const Marketplacepage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        child: Column(
+        child: const Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: 20),
@@ -213,7 +216,7 @@ class LeaderboardPage extends StatelessWidget {
   final int userBioPoints;
   final String username;
 
-  LeaderboardPage({required this.userBioPoints, required this.username});
+  const LeaderboardPage({super.key, required this.userBioPoints, required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -222,17 +225,17 @@ class LeaderboardPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               '🏁Leaderboard🏁',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
             ),
-            SizedBox(height: 20),
-            _buildLeaderboardItem(1, 'Abhijit', 500, 'assets/abhijit.png', gradientColors: [Color(0xFFFFAFBD), Color(0xFFC9FFBF)]),
-            _buildLeaderboardItem(2, 'Ritovan', 450, 'assets/ritovan.jpg', gradientColors: [Color(0xFF74EBD5), Color(0xFFACB6E5)]),
-            _buildLeaderboardItem(3, 'Naman', 400, 'assets/robot.png', gradientColors: [Color(0xFFFFE3E3), Color(0xFFDBE7FC)]),
-            _buildLeaderboardItem(4, username, userBioPoints, 'assets/man.png', gradientColors: [Color(0xFFE8F7FF), Color(0xFFD1F2EB)]),
+            const SizedBox(height: 20),
+            _buildLeaderboardItem(1, 'Abhijit', 500, 'assets/abhijit.png', gradientColors: [const Color(0xFFFFAFBD), const Color(0xFFC9FFBF)]),
+            _buildLeaderboardItem(2, 'Ritovan', 450, 'assets/ritovan.jpg', gradientColors: [const Color(0xFF74EBD5), const Color(0xFFACB6E5)]),
+            _buildLeaderboardItem(3, 'Naman', 400, 'assets/robot.png', gradientColors: [const Color(0xFFFFE3E3), const Color(0xFFDBE7FC)]),
+            _buildLeaderboardItem(4, username, userBioPoints, 'assets/man.png', gradientColors: [const Color(0xFFE8F7FF), const Color(0xFFD1F2EB)]),
           ],
         ),
       ),
@@ -241,15 +244,15 @@ class LeaderboardPage extends StatelessWidget {
 
   Widget _buildLeaderboardItem(int rank, String username, int score, String photoPath, {List<Color>? gradientColors}) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
-        padding: EdgeInsets.all(15),
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: gradientColors ?? [Color(0xFF74EBD5), Color(0xFFACB6E5)],
+            colors: gradientColors ?? [const Color(0xFF74EBD5), const Color(0xFFACB6E5)],
           ),
         ),
         child: Row(
@@ -261,17 +264,17 @@ class LeaderboardPage extends StatelessWidget {
                   radius: 30,
                   backgroundImage: AssetImage(photoPath),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Rank $rank',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                     Text(
-                      '$username',
-                      style: TextStyle(fontSize: 16, color: Colors.black),
+                      username,
+                      style: const TextStyle(fontSize: 16, color: Colors.black),
                     ),
                   ],
                 ),
@@ -279,7 +282,7 @@ class LeaderboardPage extends StatelessWidget {
             ),
             Text(
               'Bio Points: $score',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ],
         ),

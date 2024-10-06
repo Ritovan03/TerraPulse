@@ -8,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:leaf_lens/controllers/gemini_controller.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:cool_dropdown/models/cool_dropdown_item.dart';
-import 'species_list_page.dart';
 
 class VisionPage extends StatefulWidget {
   const VisionPage({Key? key}) : super(key: key);
@@ -61,23 +60,23 @@ class _VisionPageState extends State<VisionPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              margin: EdgeInsets.symmetric(vertical: 20),
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              margin: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               height: 50.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15.w),
-                color: Colors.green[100],
+                color: Colors.grey,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 2,
                     blurRadius: 7,
-                    offset: Offset(0, 3),
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -106,7 +105,7 @@ class _VisionPageState extends State<VisionPage> {
                           value: model,
                           child: Text(
                             model,
-                            style: TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black),
                           ),
                         );
                       }).toList();
@@ -131,7 +130,7 @@ class _VisionPageState extends State<VisionPage> {
                             color: Colors.grey.withOpacity(0.5),
                             spreadRadius: 2,
                             blurRadius: 7,
-                            offset: Offset(0, 3),
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -145,14 +144,14 @@ class _VisionPageState extends State<VisionPage> {
                       )
                           : ClipRRect(
                         borderRadius: BorderRadius.circular(15.w),
-                        child: Image.asset('assets/imgsearch.png'),
+                        child: Image.asset('assets/Animation.gif'),
                       ),
                     ),
                     SizedBox(height: 30.h),
                     Obx(() {
                       if (controller.isLoading.value) {
                         return LoadingAnimationWidget.staggeredDotsWave(
-                          color: Colors.green,
+                          color: Colors.grey,
                           size: 50,
                         );
                       } else {
@@ -160,20 +159,20 @@ class _VisionPageState extends State<VisionPage> {
                           padding: EdgeInsets.all(16.w),
                           width: 300.w,
                           decoration: BoxDecoration(
-                            color: Colors.green[100],
+                            color: Colors.grey,
                             borderRadius: BorderRadius.circular(15.w),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 2,
                                 blurRadius: 7,
-                                offset: Offset(0, 3),
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
                           child: Text(
                             controller.streamAnswer.toString(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
@@ -192,7 +191,7 @@ class _VisionPageState extends State<VisionPage> {
                               'Success',
                               'Species saved successfully!',
                               backgroundColor: Colors.green,
-                              titleText: Text(
+                              titleText: const Text(
                                 'Saved',
                                 style: TextStyle(
                                     color: Colors.white,
@@ -205,12 +204,12 @@ class _VisionPageState extends State<VisionPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               vertical: 12.0,
                               horizontal: 24.0,
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Save Species',
                             style: TextStyle(fontSize: 16.0),
                           ),
@@ -222,7 +221,7 @@ class _VisionPageState extends State<VisionPage> {
             ),
             Container(
               height: 60.h,
-              padding: EdgeInsets.symmetric(horizontal: 50),
+              padding: const EdgeInsets.symmetric(horizontal: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -232,28 +231,28 @@ class _VisionPageState extends State<VisionPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Select Image Source'),
+                            title: const Text('Select Image Source'),
                             actions: [
                               TextButton(
                                 onPressed: () {
                                   pickImage(ImageSource.camera);
                                   Navigator.of(context).pop();
                                 },
-                                child: Text('Camera'),
+                                child: const Text('Camera'),
                               ),
                               TextButton(
                                 onPressed: () {
                                   pickImage(ImageSource.gallery);
                                   Navigator.of(context).pop();
                                 },
-                                child: Text('Gallery'),
+                                child: const Text('Gallery'),
                               ),
                             ],
                           );
                         },
                       );
                     },
-                    icon: Icon(Icons.add_a_photo_rounded, color: Colors.green, size: 30),
+                    icon: const Icon(Icons.add_a_photo_rounded, color: Colors.green, size: 30),
                   ),
                   IconButton(
                     onPressed: () {
@@ -268,7 +267,7 @@ class _VisionPageState extends State<VisionPage> {
                           'Error',
                           'Image cannot be empty!',
                           backgroundColor: Colors.amberAccent,
-                          titleText: Text(
+                          titleText: const Text(
                             'Invalid Input',
                             style: TextStyle(
                                 color: Colors.red, fontWeight: FontWeight.bold),
@@ -276,7 +275,7 @@ class _VisionPageState extends State<VisionPage> {
                         );
                       }
                     },
-                    icon: Icon(Icons.send, color: Colors.green, size: 30),
+                    icon: const Icon(Icons.send, color: Colors.green, size: 30),
                   ),
                 ],
               ),

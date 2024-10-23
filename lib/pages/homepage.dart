@@ -6,6 +6,9 @@ import 'package:leaf_lens/pages/species_list_page.dart';
 import 'package:leaf_lens/pages/vision_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'LeaderboardPage.dart';
+import 'MarketPlace.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -45,7 +48,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.grey[700],
+        backgroundColor: Colors.green,
         title: Row(
           children: [
             Text(
@@ -171,7 +174,7 @@ class _HomePageState extends State<HomePage> {
       case 0:
         return const VisionPage();
       case 1 :
-        return const Marketplacepage();
+        return const MarketplacePage();
       case 2:
         return LeaderboardPage(userBioPoints: totalBioPoints, username: username);
       case 3:
@@ -182,111 +185,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class Marketplacepage extends StatelessWidget{
-
-  const Marketplacepage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 20),
-            Text(
-              'Market place 🛍️🛒',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-            SizedBox(height: 20),
-
-          ],
-        ),
-      ),
-    );
-  }
 
 
 
-}
 
-
-class LeaderboardPage extends StatelessWidget {
-  final int userBioPoints;
-  final String username;
-
-  const LeaderboardPage({super.key, required this.userBioPoints, required this.username});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              '🏁Leaderboard🏁',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-            const SizedBox(height: 20),
-            _buildLeaderboardItem(1, 'Abhijit', 500, 'assets/abhijit.png', gradientColors: [const Color(0xFFFFAFBD), const Color(0xFFC9FFBF)]),
-            _buildLeaderboardItem(2, 'Ritovan', 450, 'assets/ritovan.jpg', gradientColors: [const Color(0xFF74EBD5), const Color(0xFFACB6E5)]),
-            _buildLeaderboardItem(3, 'Naman', 400, 'assets/robot.png', gradientColors: [const Color(0xFFFFE3E3), const Color(0xFFDBE7FC)]),
-            _buildLeaderboardItem(4, username, userBioPoints, 'assets/man.png', gradientColors: [const Color(0xFFE8F7FF), const Color(0xFFD1F2EB)]),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeaderboardItem(int rank, String username, int score, String photoPath, {List<Color>? gradientColors}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: gradientColors ?? [const Color(0xFF74EBD5), const Color(0xFFACB6E5)],
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage(photoPath),
-                ),
-                const SizedBox(width: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Rank $rank',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                    Text(
-                      username,
-                      style: const TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Text(
-              'Bio Points: $score',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

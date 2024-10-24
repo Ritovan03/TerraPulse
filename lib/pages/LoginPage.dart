@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'SignUpPage.dart';
 import 'homepage.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
@@ -9,6 +10,54 @@ class LoginPage extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
 
   LoginPage({super.key});
+
+  // Method for normal email login
+  Future<void> _loginWithEmailAndPassword(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', emailController.text);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      _showErrorDialog(context, 'Error', e.message ?? 'An error occurred.');
+    }
+  }
+
+  // Method for Google Sign-In
+  Future<void> _loginWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        return; // The user canceled the sign-in
+      }
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', googleUser.email);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      _showErrorDialog(context, 'Google Sign-In Error', e.message ?? 'An error occurred.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +82,7 @@ class LoginPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    '🌏  Terra Pulse',
+                    '🌏 Terra Pulse',
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
@@ -67,20 +116,11 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+                      if (emailController.text.isEmpty ||
+                          passwordController.text.isEmpty) {
                         _showErrorDialog(context, 'Error', 'Please fill in both username and password fields.');
                       } else {
-                        // Save the username
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('username', emailController.text);
-
-                        // Perform login functionality here
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomePage(),
-                          ),
-                        );
+                        await _loginWithEmailAndPassword(context);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -96,6 +136,24 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     child: const Text('Login'),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: () => _loginWithGoogle(context),
+                    icon: const Icon(Icons.login, color: Colors.white),
+                    label: const Text('Sign in with Google'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
@@ -121,7 +179,12 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField({required TextEditingController controller, required String labelText, required IconData icon, bool obscureText = false}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    bool obscureText = false,
+  }) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(

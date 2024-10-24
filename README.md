@@ -1,4 +1,4 @@
-# 🌿 Biodiversity Exploration App 🌍
+# 🌍 Terra Pulse : Our gift to the world
 
 <img src="https://github.com/abhijit-23blaze/Bio-Bounty/assets/169768803/bba20ca8-c90e-4991-bd9c-e4d40fc61bad" alt="ed_content" width="100">
 

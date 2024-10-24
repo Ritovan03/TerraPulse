@@ -5,9 +5,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:leaf_lens/controllers/gemini_controller.dart';
 import 'package:leaf_lens/pages/LoginPage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 
 
 void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final dotenv = DotEnv();
   await dotenv.load(fileName: ".env");
   String APIKEY = dotenv.get('GEMINI-APIKEY');

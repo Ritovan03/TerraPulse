@@ -116,7 +116,7 @@ class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
           ),
           const SizedBox(height: 16.0),
           Text(
-            userData!['email'] ?? 'No Email',
+            userData!['name'] ?? 'No Name',
             style: const TextStyle(
               fontSize: 24.0,
               fontWeight: FontWeight.bold,

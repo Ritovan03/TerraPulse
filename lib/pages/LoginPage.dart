@@ -86,7 +86,7 @@ class LoginPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      //color: Colors.black,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -96,7 +96,7 @@ class LoginPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      //color: Colors.black,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -124,8 +124,8 @@ class LoginPage extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      foregroundColor: Colors.white,
+                      // backgroundColor: Colors.grey,
+                      // foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -140,11 +140,11 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
                     onPressed: () => _loginWithGoogle(context),
-                    icon: const Icon(Icons.login, color: Colors.white),
+                    icon: const Icon(Icons.login),
                     label: const Text('Sign in with Google'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
+                      // backgroundColor: Colors.grey,
+                      // foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),

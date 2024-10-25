@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return LeaderboardPage(userBioPoints: totalBioPoints, username: username);
       case 3:
-        return const SpeciesListPage();
+        return const ProfileWithSpeciesPage();
       default:
         return const VisionPage();
     }

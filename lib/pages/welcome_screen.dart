@@ -25,13 +25,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     super.initState();
     // Check if user is already signed in
     Future.delayed(Duration.zero, () {
-      // if (_auth.currentUser != null) {
-      //   Navigator.of(context).pushReplacement(
-      //     MaterialPageRoute(
-      //       builder: (context) => HomePage(),
-      //     ),
-      //   );
-      // }
+      if (_auth.currentUser != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      }
     });
 
     // Listen for auth state changes

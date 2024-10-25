@@ -1,12 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:leaf_lens/main.dart';
 import 'package:flutter/material.dart';
 import 'package:leaf_lens/pages/LoginPage.dart';
+import 'package:leaf_lens/pages/SignUp1.dart';
 import 'SignUpPage.dart';
-//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-//import 'package:agriplant/core/utils/assets_data.dart';
-//import 'package:leaf_lens/pages/vision_page.dart;
+import 'SignUp1.dart';
 import 'homepage.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:google_sign_in/google_sign_in.dart'; // Add this import
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -16,6 +17,60 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(); // Add this
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user is already signed in
+    Future.delayed(Duration.zero, () {
+      // if (_auth.currentUser != null) {
+      //   Navigator.of(context).pushReplacement(
+      //     MaterialPageRoute(
+      //       builder: (context) => HomePage(),
+      //     ),
+      //   );
+      // }
+    });
+
+    // Listen for auth state changes
+    _auth.authStateChanges().listen((User? user) {
+      if (user != null && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => SignUp1(),
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return; // User canceled the sign-in flow
+
+      // Obtain auth details from request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      await _auth.signInWithCredential(credential);
+    } catch (error) {
+      print('Error during Google sign in: $error');
+      // Show error to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to sign in with Google: ${error.toString()}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,13 +99,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     "Terra Pulse is a platform made for Wanderers, by Wanderers. Here you can explore the world and nature in a new way and make bio coins while doing, then you can redeem these bio coin for variou sustainable items in our market place.",
                     textAlign: TextAlign.center,
                   ),
-                  // const SizedBox(height: 60),
-                  // Text(
-                  //   "Please choose a laguage from the following to continue with",
-                  //   textAlign: TextAlign.center,
-                  //   style: TextStyle(fontSize: 17),
-                  //
-                  // ),
                 ],
               ),
             ),
@@ -58,42 +106,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 FilledButton.tonal(
-                  onPressed: () {
-                    // AppLocalizations.delegate.load(const Locale('hi')); // Change to Hindi
-                    // setState(() {}); // Rebuild the UI with the new locale
-                   // MyApp.setLocale(context, Locale('hi'));
-                  },
+                  onPressed: () {},
                   child: Text('Hindi'),
                 ),
                 FilledButton.tonal(
-                  onPressed: () {
-                    //MyApp.setLocale(context, Locale('te'));
-                  },
+                  onPressed: () {},
                   child: Text('Espaneol'),
                 ),
                 FilledButton.tonal(
-                  onPressed: () {
-                    //MyApp.setLocale(context, Locale('en'));
-                  },
+                  onPressed: () {},
                   child: Text('English'),
                 ),
               ],
             ),
-
             const SizedBox(height: 40),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => SignUpPage(),
-                  ),
-                );
-              },
+              onPressed: _handleGoogleSignIn,
               icon: const Icon(Icons.login),
               label: const Text('Continue to SignUp'),
               style: ElevatedButton.styleFrom(
-                // backgroundColor: Colors.grey,
-                // foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -110,7 +141,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SignUpPage(),
+                    builder: (context) => LoginPage(),
                   ),
                 );
               },
@@ -120,21 +151,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // FilledButton.tonalIcon(
-            //   onPressed: () {
-            //     Navigator.of(context).pushReplacement(
-            //       MaterialPageRoute(
-            //         builder: (context) => HomePage(),
-            //       ),
-            //     );
-            //   },
-            //   icon: const Icon(IconlyLight.addUser),
-            //   label: const Text(
-            //     'New here? Signup',
-            //     //style: TextStyle(fontSize: 20),
-            //   ),
-            // ),
-            // const SizedBox(height: 20),
           ],
         ),
       ),

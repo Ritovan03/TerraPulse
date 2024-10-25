@@ -13,6 +13,8 @@ import 'package:leaf_lens/pages/welcome_screen.dart';
 
 void main() async {
 
+  WidgetsFlutterBinding.ensureInitialized();
+
   final dotenv = DotEnv();
   await dotenv.load(fileName: ".env");
   String APIKEY = dotenv.get('GEMINI-APIKEY');
@@ -22,7 +24,9 @@ void main() async {
 
   Gemini.init(apiKey: APIKEY);
   Get.put(GeminiChatController());
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

@@ -1,25 +1,48 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SpeciesListPage extends StatefulWidget {
-  const SpeciesListPage({super.key});
+class ProfileWithSpeciesPage extends StatefulWidget {
+  const ProfileWithSpeciesPage({Key? key}) : super(key: key);
 
   @override
-  _SpeciesListPageState createState() => _SpeciesListPageState();
+  _ProfileWithSpeciesPageState createState() => _ProfileWithSpeciesPageState();
 }
 
-class _SpeciesListPageState extends State<SpeciesListPage> {
+class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Map<String, dynamic>? userData;
   List<Map<String, dynamic>> speciesList = [];
   int totalBioPoints = 0;
   int treesPlanted = 0;
-  String username = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _loadUserData();
     loadSpeciesData();
-    loadUsername();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final doc = await _firestore.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          setState(() {
+            userData = doc.data();
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> loadSpeciesData() async {
@@ -30,9 +53,8 @@ class _SpeciesListPageState extends State<SpeciesListPage> {
 
     for (var item in savedList) {
       final splitItem = item.split('|');
-      if (splitItem.length < 2) {
-        continue;
-      }
+      if (splitItem.length < 2) continue;
+
       final prompt = splitItem[0];
       final imagePath = splitItem[1];
       final rarityScale = int.tryParse(splitItem.length > 2 ? splitItem[2] : '0') ?? 0;
@@ -48,14 +70,6 @@ class _SpeciesListPageState extends State<SpeciesListPage> {
     setState(() {
       speciesList = loadedList;
       totalBioPoints = bioPoints;
-      prefs.setInt('total_bio_points', totalBioPoints);
-    });
-  }
-
-  Future<void> loadUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      username = prefs.getString('username') ?? 'Guest';
     });
   }
 
@@ -75,135 +89,142 @@ class _SpeciesListPageState extends State<SpeciesListPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.green[100],
-                borderRadius: BorderRadius.circular(15.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 7,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/man.png'),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  const Text(
-                    'Skill Level 1 🔆',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  LinearProgressIndicator(
-                    value: 0.7,
-                    backgroundColor: Colors.grey[300],
-                    minHeight: 10,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    'Discovered Species: ${speciesList.length} 🐼',
-                    style: const TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Total Bio Points: $totalBioPoints 🪙',
-                    style: const TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: donateBioPoints,
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                    ),
-                    child: const Text(
-                      'Donate Bio Points to Plant Trees 🥺🙏',
-                      style: TextStyle(fontSize: 12.0),
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Trees Planted: $treesPlanted 🌳',
-                    style: const TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20.0),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: speciesList
-                        .sublist(0, (speciesList.length / 2).ceil())
-                        .map((species) {
-                      final imagePath = species['imagePath'];
-                      final prompt = species['prompt'];
-                      return _buildSpeciesCard(imagePath, prompt);
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(width: 10.0),
-                Expanded(
-                  child: Column(
-                    children: speciesList
-                        .sublist((speciesList.length / 2).ceil())
-                        .map((species) {
-                      final imagePath = species['imagePath'];
-                      final prompt = species['prompt'];
-                      return _buildSpeciesCard(imagePath, prompt);
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+  Widget _buildProfileCard() {
+    if (userData == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.green[100],
+        borderRadius: BorderRadius.circular(15.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: userData!['photoURL'] != null
+                ? NetworkImage(userData!['photoURL'])
+                : const AssetImage('assets/man.png') as ImageProvider,
+          ),
+          const SizedBox(height: 16.0),
+          Text(
+            userData!['email'] ?? 'No Email',
+            style: const TextStyle(
+              fontSize: 24.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          _buildInfoRow('Location', userData!['location'] ?? 'Not specified', Icons.location_on),
+          _buildInfoRow('Person Type', userData!['personType'] ?? 'Not specified', Icons.person),
+          _buildInfoRow('Discovery Source', userData!['discoverySource'] ?? 'Not specified', Icons.source),
+          const SizedBox(height: 16.0),
+          const Text(
+            'Skill Level 1 🔆',
+            style: TextStyle(fontSize: 16.0, color: Colors.black54),
+          ),
+          const SizedBox(height: 8.0),
+          LinearProgressIndicator(
+            value: 0.7,
+            backgroundColor: Colors.grey[300],
+            minHeight: 10,
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+          ),
+          const SizedBox(height: 16.0),
+          Text(
+            'Discovered Species: ${speciesList.length} 🐼',
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            'Total Bio Points: $totalBioPoints 🪙',
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          ElevatedButton(
+            onPressed: donateBioPoints,
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+            ),
+            child: const Text(
+              'Donate Bio Points to Plant Trees 🥺🙏',
+              style: TextStyle(fontSize: 12.0),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            'Trees Planted: $treesPlanted 🌳',
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.green),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '$label: $value',
+              style: const TextStyle(fontSize: 14.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpeciesGrid() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            children: speciesList
+                .sublist(0, (speciesList.length / 2).ceil())
+                .map((species) => _buildSpeciesCard(species['imagePath'], species['prompt']))
+                .toList(),
+          ),
+        ),
+        const SizedBox(width: 10.0),
+        Expanded(
+          child: Column(
+            children: speciesList
+                .sublist((speciesList.length / 2).ceil())
+                .map((species) => _buildSpeciesCard(species['imagePath'], species['prompt']))
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -239,7 +260,36 @@ class _SpeciesListPageState extends State<SpeciesListPage> {
                 color: Colors.black,
               ),
             ),
-            const SizedBox(height: 10.0),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+        centerTitle: true,
+        backgroundColor: Colors.green,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildProfileCard(),
+            const SizedBox(height: 20.0),
+            if (speciesList.isNotEmpty) _buildSpeciesGrid(),
           ],
         ),
       ),

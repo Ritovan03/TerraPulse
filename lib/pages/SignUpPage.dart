@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'homepage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpPage extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
@@ -8,6 +8,22 @@ class SignUpPage extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
 
   SignUpPage({super.key});
+
+  Future<void> _signUp(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      _showErrorDialog(context, 'Error', e.message ?? 'An error occurred.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,28 +48,18 @@ class SignUpPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    '🌿Bio Bounty',
+                    'Sign Up',
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Create Your Account',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                    //  color: Colors.black,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   _buildTextField(
                     controller: nameController,
-                    labelText: 'Username',
+                    labelText: 'Name',
                     icon: Icons.person,
                   ),
                   const SizedBox(height: 20),
@@ -71,23 +77,10 @@ class SignUpPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      if (nameController.text.isEmpty ||
-                          emailController.text.isEmpty ||
-                          passwordController.text.isEmpty) {
-                        _showErrorDialog(
-                            context, 'Error', 'Please fill in all fields to sign up.');
-                      } else {
-                        // Perform sign-up functionality here
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomePage()),
-                        );
-                      }
-                    },
+                    onPressed: () => _signUp(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      // backgroundColor: Colors.grey,
+                      // foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -97,7 +90,17 @@ class SignUpPage extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: const Text('Sign Up'),
+                    child: const Text('Create Account'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Already have an account? Log In',
+                      //style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                 ],
               ),
@@ -118,7 +121,7 @@ class SignUpPage extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: Icon(icon, color: Colors.green),
+        prefixIcon: Icon(icon,),
         filled: true,
         fillColor: Colors.white.withOpacity(0.8),
         border: OutlineInputBorder(

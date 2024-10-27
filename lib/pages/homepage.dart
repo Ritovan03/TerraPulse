@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.2),
+              color: Colors.grey.withOpacity(0.2),
               border: Border(
                 bottom: BorderSide(
                   color: Colors.white.withOpacity(0.2),
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.black.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       'Terra Pulse',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 24.sp,
                       ),
@@ -112,6 +112,7 @@ class _HomePageState extends State<HomePage> {
                   _buildInfoButton(context),
                 ],
               ),
+
             ),
           ),
         ),
@@ -122,7 +123,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildInfoButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.black.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: IconButton(

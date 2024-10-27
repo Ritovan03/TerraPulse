@@ -346,7 +346,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Search eco-friendly products...',
+                hintText: '',
                 hintStyle: TextStyle(color: Colors.grey.shade600),
                 prefixIcon: const Icon(Icons.search, color: primaryColor),
                 border: InputBorder.none,

@@ -14,7 +14,7 @@ class LeaderboardPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 140),
             const Text(
               '🏁Leaderboard🏁',
               textAlign: TextAlign.center,

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProfileWithSpeciesPage extends StatefulWidget {
   const ProfileWithSpeciesPage({Key? key}) : super(key: key);
@@ -11,9 +13,11 @@ class ProfileWithSpeciesPage extends StatefulWidget {
   _ProfileWithSpeciesPageState createState() => _ProfileWithSpeciesPageState();
 }
 
-class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
+class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> with SingleTickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
   Map<String, dynamic>? userData;
   List<Map<String, dynamic>> speciesList = [];
   int totalBioPoints = 0;
@@ -23,8 +27,22 @@ class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
     _loadUserData();
     loadSpeciesData();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -69,7 +87,7 @@ class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
 
     setState(() {
       speciesList = loadedList;
-      totalBioPoints = bioPoints;
+      totalBioPoints = userData!['coin'] ?? '0';
     });
   }
 
@@ -89,95 +107,84 @@ class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
     }
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileHeader() {
     if (userData == null) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      height: 350,
       decoration: BoxDecoration(
-        color: Colors.green[100],
-        borderRadius: BorderRadius.circular(15.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 7,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.green.shade400, Colors.teal.shade600],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
       ),
-      child: Column(
+      child: Stack(
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: userData!['photoURL'] != null
-                ? NetworkImage(userData!['photoURL'])
-                : const AssetImage('assets/man.png') as ImageProvider,
-          ),
-          const SizedBox(height: 16.0),
-          Text(
-            userData!['name'] ?? 'No Name',
-            style: const TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-          _buildInfoRow('Location', userData!['location'] ?? 'Not specified', Icons.location_on),
-          _buildInfoRow('Person Type', userData!['personType'] ?? 'Not specified', Icons.person),
-          _buildInfoRow('Discovery Source', userData!['discoverySource'] ?? 'Not specified', Icons.source),
-          const SizedBox(height: 16.0),
-          const Text(
-            'Skill Level 1 🔆',
-            style: TextStyle(fontSize: 16.0, color: Colors.black54),
-          ),
-          const SizedBox(height: 8.0),
-          LinearProgressIndicator(
-            value: 0.7,
-            backgroundColor: Colors.grey[300],
-            minHeight: 10,
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-          ),
-          const SizedBox(height: 16.0),
-          Text(
-            'Discovered Species: ${speciesList.length} 🐼',
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          Text(
-            'Total Bio Points: $totalBioPoints 🪙',
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: donateBioPoints,
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          Positioned(
+            top: 150,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Hero(
+                tag: 'profile_image',
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: userData!['photoURL'] != null
+                        ? NetworkImage(userData!['photoURL'])
+                        : const AssetImage('assets/man.png') as ImageProvider,
+                  ),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-            ),
-            child: const Text(
-              'Donate Bio Points to Plant Trees 🥺🙏',
-              style: TextStyle(fontSize: 12.0),
             ),
           ),
-          const SizedBox(height: 8.0),
-          Text(
-            'Trees Planted: $treesPlanted 🌳',
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+
+          Positioned(
+            bottom: 10,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                Text(
+                  userData!['name'] ?? 'No Name',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(1, 1),
+                        blurRadius: 3,
+                        color: Colors.black26,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  userData!['location'] ?? 'Not specified',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -185,83 +192,225 @@ class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.green),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '$label: $value',
-              style: const TextStyle(fontSize: 14.0),
+  Widget _buildStatsCard() {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem('Species', speciesList.length, '🐼'),
+                _buildStatItem('Bio Points', totalBioPoints, '🪙'),
+                _buildStatItem('Trees', treesPlanted, '🌳'),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: 0.7,
+                minHeight: 8,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green[600]!),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Level 1 Explorer 🔆',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSpeciesGrid() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStatItem(String label, int value, String emoji) {
+    return Column(
       children: [
-        Expanded(
-          child: Column(
-            children: speciesList
-                .sublist(0, (speciesList.length / 2).ceil())
-                .map((species) => _buildSpeciesCard(species['imagePath'], species['prompt']))
-                .toList(),
+        Text(
+          '$value',
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(width: 10.0),
-        Expanded(
-          child: Column(
-            children: speciesList
-                .sublist((speciesList.length / 2).ceil())
-                .map((species) => _buildSpeciesCard(species['imagePath'], species['prompt']))
-                .toList(),
+        const SizedBox(height: 4),
+        Text(
+          '$label $emoji',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSpeciesCard(String imagePath, String prompt) {
-    return Card(
-      color: Colors.lightGreen[200],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Image.file(
-                  File(imagePath),
-                  fit: BoxFit.cover,
-                  height: 120,
-                  width: double.infinity,
-                ),
+  Widget _buildDonateButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: ElevatedButton(
+        onPressed: () {
+          donateBioPoints();
+          // Add animation for button press
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: const [
+                  Icon(Icons.eco, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Thank you for contributing to a greener planet! 🌍'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            const SizedBox(height: 10.0),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white, backgroundColor: Colors.green[600],
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          elevation: 4,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.favorite),
+            SizedBox(width: 8),
             Text(
-              prompt,
-              style: const TextStyle(
-                fontSize: 10.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+              'Donate Bio Points to Plant Trees',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpeciesGrid() {
+    return MasonryGridView.count(
+      crossAxisCount: 2,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: speciesList.length,
+      itemBuilder: (context, index) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: _buildSpeciesCard(
+            speciesList[index]['imagePath'],
+            speciesList[index]['prompt'],
+            speciesList[index]['rarityScale'],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSpeciesCard(String imagePath, String prompt, int rarityScale) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Image.file(
+                  File(imagePath),
+                  fit: BoxFit.cover,
+                  height: 150,
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        prompt,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: List.generate(
+                          rarityScale,
+                              (index) => const Icon(Icons.star, size: 16, color: Colors.amber),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${rarityScale}x',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        children: [
+          Container(
+            height: 200,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 100,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -269,29 +418,54 @@ class _ProfileWithSpeciesPageState extends State<ProfileWithSpeciesPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+      return Scaffold(
+        body: _buildLoadingShimmer(),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-        backgroundColor: Colors.green,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildProfileCard(),
-            const SizedBox(height: 20.0),
-            if (speciesList.isNotEmpty) _buildSpeciesGrid(),
-          ],
-        ),
+      body: CustomScrollView(
+        slivers: [
+          // SliverAppBar(
+          //   expandedHeight: 0,
+          //   floating: true,
+          //   pinned: true,
+          //   backgroundColor: Colors.green[600],
+          //   elevation: 0,
+          //   title: const Text('Profile'),
+          //   centerTitle: true,
+          // ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                _buildProfileHeader(),
+                const SizedBox(height: 20),
+                _buildStatsCard(),
+                const SizedBox(height: 20),
+                _buildDonateButton(),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Discovered Species',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (speciesList.isNotEmpty) _buildSpeciesGrid(),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

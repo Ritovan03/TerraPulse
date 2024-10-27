@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.white.withOpacity(0.2),
               border: Border(
                 bottom: BorderSide(
                   color: Colors.white.withOpacity(0.2),
@@ -74,7 +74,8 @@ class _HomePageState extends State<HomePage> {
             child: AppBar(
               elevation: 0,
               backgroundColor: Colors.transparent,
-              title: Row(
+              title:
+              Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
@@ -113,7 +114,10 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
 
+
+
             ),
+
           ),
         ),
       ),

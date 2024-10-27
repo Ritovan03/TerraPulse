@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class MarketplacePage extends StatefulWidget {
@@ -8,6 +10,10 @@ class MarketplacePage extends StatefulWidget {
 }
 
 class _MarketplacePageState extends State<MarketplacePage> {
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  String _searchQuery = '';
+
   Map<String, bool> selectedFilters = {
     'Sustainable': false,
     'Plastic-free': false,
@@ -17,10 +23,19 @@ class _MarketplacePageState extends State<MarketplacePage> {
     'Fair Trade': false,
   };
 
-  // Common tag style constants
-  static const tagBackgroundColor = Color(0xFFE8F5E9);
-  static const tagTextColor = Color(0xFF2E7D32);
-  static const cardBackgroundColor = Color(0xFFF5F9F5);
+  // Enhanced color scheme
+  static const primaryColor = Color(0xFF2E7D32);
+  static const secondaryColor = Color(0xFFE8F5E9);
+  static const backgroundColor = Color(0xFFF5F9F5);
+  static const textColor = Color(0xFF1B5E20);
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
 
   void _showFilterDialog(BuildContext context) {
     showDialog(
@@ -29,48 +44,71 @@ class _MarketplacePageState extends State<MarketplacePage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text(
-                'Filter Products',
-                style: TextStyle(color: Color(0xFF2E7D32)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              content: Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: selectedFilters.keys.map((filter) {
-                  return FilterChip(
-                    label: Text(filter),
-                    selected: selectedFilters[filter]!,
-                    onSelected: (bool value) {
-                      setState(() {
-                        selectedFilters[filter] = value;
-                      });
-                    },
-                    backgroundColor: tagBackgroundColor,
-                    selectedColor: Colors.green.shade200,
-                    checkmarkColor: tagTextColor,
-                    labelStyle: TextStyle(
-                      color: selectedFilters[filter]! ? tagTextColor : Colors.grey.shade700,
+              title: const Row(
+                children: [
+                  Icon(Icons.filter_list, color: primaryColor),
+                  SizedBox(width: 8),
+                  Text(
+                    'Filter Products',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                }).toList(),
+                  ),
+                ],
+              ),
+              content: Container(
+                width: double.maxFinite,
+                child: Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: selectedFilters.keys.map((filter) {
+                    return FilterChip(
+                      label: Text(filter),
+                      selected: selectedFilters[filter]!,
+                      onSelected: (bool value) {
+                        setState(() {
+                          selectedFilters[filter] = value;
+                        });
+                      },
+                      backgroundColor: secondaryColor,
+                      selectedColor: primaryColor.withOpacity(0.2),
+                      checkmarkColor: primaryColor,
+                      labelStyle: TextStyle(
+                        color: selectedFilters[filter]! ? primaryColor : Colors.grey.shade700,
+                        fontWeight: selectedFilters[filter]! ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    );
+                  }).toList(),
+                ),
               ),
               actions: [
-                TextButton(
+                TextButton.icon(
+                  icon: const Icon(Icons.clear_all, size: 18),
+                  label: const Text('Clear All'),
                   onPressed: () {
                     setState(() {
                       selectedFilters.updateAll((key, value) => false);
                     });
                   },
-                  child: const Text(
-                    'Clear All',
-                    style: TextStyle(color: Colors.grey),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.grey,
                   ),
                 ),
-                TextButton(
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.check, size: 18),
+                  label: const Text('Apply'),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Apply',
-                    style: TextStyle(color: tagTextColor),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ],
@@ -79,6 +117,29 @@ class _MarketplacePageState extends State<MarketplacePage> {
         );
       },
     );
+  }
+
+  List<Map<String, dynamic>> _getFilteredItems(List<Map<String, dynamic>> items) {
+    return items.where((item) {
+      // Apply search filter
+      if (_searchQuery.isNotEmpty) {
+        final name = item['name'].toString().toLowerCase();
+        final description = item['description'].toString().toLowerCase();
+        final searchLower = _searchQuery.toLowerCase();
+        if (!name.contains(searchLower) && !description.contains(searchLower)) {
+          return false;
+        }
+      }
+
+      // Apply tag filters
+      if (selectedFilters.containsValue(true)) {
+        final itemTags = item['tags'] as List<String>;
+        return selectedFilters.entries
+            .where((entry) => entry.value)
+            .any((entry) => itemTags.contains(entry.key));
+      }
+      return true;
+    }).toList();
   }
 
   @override
@@ -199,175 +260,220 @@ class _MarketplacePageState extends State<MarketplacePage> {
       // ... other items remain the same
     ];
 
+    final filteredItems = _getFilteredItems(items);
+
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.green.shade50,
-              Colors.white,
-            ],
-            stops: const [0.0, 0.3],
+      backgroundColor: Colors.transparent, // Make scaffold transparent
+      body: Stack(
+        children: [
+          // Background gradient that extends under the app bar
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  primaryColor.withOpacity(0.1),
+                  backgroundColor,
+                ],
+                stops: const [0.0, 0.3],
+              ),
+            ),
           ),
+          // Main content
+          CustomScrollView(
+            controller: _scrollController,
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // Add extra space for app bar
+              const SliverToBoxAdapter(
+                child: SizedBox(height: kToolbarHeight + 60), // Adjust based on your app bar height
+              ),
+              // Search bar
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: _buildSearchBar(),
+                ),
+              ),
+              // Products grid
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildProductCard(filteredItems[index], context),
+                    childCount: filteredItems.length,
+                  ),
+                ),
+              ),
+              // Bottom padding
+              const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8), // Make search bar slightly transparent
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search eco-friendly products...',
+                hintStyle: TextStyle(color: Colors.grey.shade600),
+                prefixIcon: const Icon(Icons.search, color: primaryColor),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: primaryColor,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.tune, color: Colors.white),
+              onPressed: () => _showFilterDialog(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Map<String, dynamic> product, BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(product: product),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 35),
-            Row(
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9), // Slightly transparent cards
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
+                  flex: 2,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25.0),
-                      border: Border.all(color: Colors.grey.shade200),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      color: secondaryColor.withOpacity(0.3),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search eco-friendly products...',
-                        hintStyle: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey.shade400,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                    child: Center(
+                      child: Hero(
+                        tag: 'product_${product['name']}',
+                        child: Text(
+                          product['image'] as String,
+                          style: const TextStyle(fontSize: 50),
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: () => _showFilterDialog(context),
-                  child: Container(
+                Expanded(
+                  flex: 3,
+                  child: Padding(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2E7D32),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: const Icon(
-                      Icons.tune,
-                      color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product['name'] as String,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product['price'] as String,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
+                        const Spacer(),
+                        Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: (product['tags'] as List<String>)
+                              .take(2)
+                              .map((tag) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: secondaryColor.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              tag,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ))
+                              .toList(),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.only(bottom: 24),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.65,
-                ),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProductDetailPage(
-                            product: items[index],
-                          ),
-                        ),
-                      );
-                    },
-                    child: Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      color: cardBackgroundColor,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: Colors.green.shade100,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              items[index]['image'] as String,
-                              style: const TextStyle(fontSize: 45),
-                            ),
-                            const SizedBox(height: 12),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                items[index]['name'] as String,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              items[index]['price'] as String,
-                              style: const TextStyle(
-                                color: Color(0xFF2E7D32),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              children: (items[index]['tags'] as List<String>)
-                                  .take(2)
-                                  .map((tag) => Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: tagBackgroundColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  tag,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: tagTextColor,
-                                  ),
-                                ),
-                              ))
-                                  .toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
